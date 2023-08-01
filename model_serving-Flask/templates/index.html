@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Classification Result</title>
+</head>
+<body>
+    <h1>Image Classification Result</h1>
+    <form id="upload-form" enctype="multipart/form-data">
+        <input type="file" name="image" id="image-input" accept="image/*">
+        <label for="top_n">Top N Classes:</label>
+        <input type="number" name="top_n" id="top_n" value="1" min="1">
+        <button type="button" onclick="predictImage()">Predict</button>
+    </form>
+
+    <div id="result-section" style="display: none;">
+        <h2>Result:</h2>
+        <p id="result"></p>
+        <p id="top_probability"></p>
+        <h2>Classes:</h2>
+        <ul id="classes"></ul>
+    </div>
+
+    <script>
+        function predictImage() {
+            const form = document.getElementById('upload-form');
+            const formData = new FormData(form);
+
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').innerText = 'Result: ' + data.result;
+                document.getElementById('top_probability').innerText = 'Top Probability: ' + data.top_probability;
+
+                const classes = data.classes.map(cls => {
+                    return `<li>${cls[1]} (Class ID: ${cls[0]}, Probability: ${cls[2]})</li>`;
+                });
+                document.getElementById('classes').innerHTML = classes.join('');
+
+                document.getElementById('result-section').style.display = 'block';
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Model Serving</title>
+     <style>
+        .btn {
+            background-image: linear-gradient(to right, #97FEED, #F09819);
+            color: #fff;
+            padding: 10px 17px;
+            font-size: 14px;
+            border: 2px solid;
+            border-radius: 30px;
+            cursor: pointer;
+            width: 120px; /* Increased width */
+        }
+    </style>
+</head>
+<body>
+    <h1>Forest Cover Type Prediction</h1>
+    <button class="btn" onclick="displayInfo()">Index</button>
+    <div id="infoDisplay"></div><br>
+    <br>
+    <button class="btn" onclick="displayInfo1()">Version</button>
+    <div id="infoDisplay1"></div>
+    <br>
+    <label for="dataInput">Enter data:</label>
+    <input type="text" id="dataInput" name="dataInput" required>
+    <input type="submit" value="Predict" onclick="predictResult()">
+
+    <!-- Display predicted results here -->
+    <h2>Predicted Results:</h2>
+    <p>Predict-1(Top Classifier): <span id="predictedResultLight"></span></p>
+    <p>Predict-2(2nd Best): <span id="predictedResultRA"></span></p>
+    <p>Predict-3(Ensemble): <span id="predictedResultBlending"></span></p>
+
+    <script>
+    // JavaScript to handle the form submission and update the predicted results
+    function predictResult() {
+        const data = document.getElementById('dataInput').value;
+        fetch('http://127.0.0.1:8000/fastapi/predict', { // Use the FastAPI endpoint
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({ data: data }) // Use URLSearchParams to send the data
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Display the predicted results in the corresponding span elements
+            document.getElementById('predictedResultLight').innerText = data.prediction;
+            document.getElementById('predictedResultRA').innerText = data.prediction1;
+            document.getElementById('predictedResultBlending').innerText = data.prediction2;
+        })
+        .catch(error => {
+            // Handle any errors that may occur during prediction
+            console.error('Error:', error);
+        });
+    }
+
+    function displayInfo() {
+        // This function will be called when the button is clicked
+        const info = "Model Serving Demo"; // Modify this if needed
+        document.getElementById('infoDisplay').innerText = info;
+    }
+
+    function displayInfo1() {
+        // This function will be called when the "Version" button is clicked
+        fetch('http://127.0.0.1:8000/fastapi/version_info') // Use the FastAPI endpoint for version info
+        .then(response => response.json())
+        .then(data => {
+            const info = `App Name: ${data.app_name}\nVersion: ${data.version}`;
+            document.getElementById('infoDisplay1').innerText = info;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+</script>
+</body>
+</html>
+
